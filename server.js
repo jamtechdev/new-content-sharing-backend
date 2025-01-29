@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 
 const cors = require("cors");
 const userRouter = require("./routes/Api/users/users.route");
-// const ProfileRouter = require("./routes/Api/profile/profile.route");
+const ProfileRouter = require("./routes/Api/users/usersProfile.route");
 app.use(bodyParser.json());
 
 app.use(cors());
@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth", userRouter);
 // user profile route
-// app.use("/api/profile", ProfileRouter);
+app.use("/api/profile", ProfileRouter);
 
 app.get("/health", (req, res) => res.status(200).json({ status: "OK" }));
 app.listen(PORT, () => {

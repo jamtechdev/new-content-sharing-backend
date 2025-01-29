@@ -9,7 +9,7 @@ exports.getModalProfileById = async (req, res) => {
     const { id } = req.params;
     const profile = await Profile.findOne({
       where: { id },
-      attributes: ["username"],
+      attributes: ["username", "bio"],
       include: [
         {
           model: User,
@@ -18,13 +18,20 @@ exports.getModalProfileById = async (req, res) => {
         },
         {
           model: Region,
-          as: "region",
+          as: "region", 
           attributes: ["name"],
         },
       ],
+      raw: true,
+      nest: true,
     });
     if (!profile) {
-      return res.status(404).json({ message: "profile not found" });
+      return res.status(404).json({
+        code: 404,
+        status: false,
+
+        message: "profile not found",
+      });
     }
     res.status(200).json({
       code: 200,

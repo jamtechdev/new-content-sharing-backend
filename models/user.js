@@ -14,10 +14,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "role_id",
         as: "role",
       });
-      // User.belongsTo(models.model_profile, {
-      //   foreignKey: "id",
-      //   as: "model_profiles",
-      // });
+      User.hasOne(models.model_profile, {
+        foreignKey: "user_id",
+        as: "model_profiles",
+      });
     }
 
     // verifyPassword(plainPassword) {
