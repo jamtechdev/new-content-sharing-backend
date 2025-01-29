@@ -23,8 +23,8 @@ exports.signUp = async (req, res) => {
       avatar,
       role_id,
     } = req.body;
-
-    if (name || email || password) {
+    console.log(req.body);
+    if (!name || !email || !password) {
       return res.status(400).json({
         status: 400,
         success: false,
@@ -59,7 +59,12 @@ exports.signUp = async (req, res) => {
 
     let existing_user = await User?.findOne({ where: { email } });
     if (existing_user)
-      return res.status(400).json({ message: "Email already registered" });
+      return res.status(400).json({
+        status: 400,
+        success: false,
+
+        message: "Email already registered",
+      });
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
 

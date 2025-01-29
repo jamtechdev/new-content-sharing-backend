@@ -1,7 +1,7 @@
 require("dotenv").config();
 const db = require("../../models/index.js");
 const User = db.users;
-const Region = db.roles;
+const Region = db.Regions;
 const Profile = db.model_profile;
 
 exports.getModalProfileById = async (req, res) => {
