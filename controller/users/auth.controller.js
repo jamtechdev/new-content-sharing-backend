@@ -35,13 +35,13 @@ exports.signUp = async (req, res) => {
       });
     }
 
-    if (!region_id) {
-      return res.status(400).json({
-        status: 400,
-        success: false,
-        message: "Region is required",
-      });
-    }
+    // if (!region_id) {
+    //   return res.status(400).json({
+    //     status: 400,
+    //     success: false,
+    //     message: "Region is required",
+    //   });
+    // }
 
     if (!role_id) {
       return res.status(400).json({

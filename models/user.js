@@ -79,7 +79,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       region_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
       },
       createdAt: {
         allowNull: false,
