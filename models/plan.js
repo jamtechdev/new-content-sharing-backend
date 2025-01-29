@@ -25,10 +25,10 @@ module.exports = (sequelize, DataTypes) => {
       model_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-          model: "model_profiles",
-          key: "id",
-        },
+        // references: {
+        //   model: "model_profiles",
+        //   key: "id",
+        // },
       },
       name: {
         type: DataTypes.STRING,
@@ -52,8 +52,6 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "Plan",
       tableName: "plans",
       timestamps: true,
-      createdAt: "created_at",
-      updatedAt: "updated_at",
     }
   );
 

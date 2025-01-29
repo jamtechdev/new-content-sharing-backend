@@ -12,11 +12,11 @@ module.exports = {
       model_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: {
-          model: "model_profiles", // Assuming "model_profiles" table exists
-          key: "id",
-        },
-        onDelete: "CASCADE",
+        // references: {
+        //   model: "model_profiles", // Assuming "model_profiles" table exists
+        //   key: "id",
+        // },
+        // onDelete: "CASCADE",
       },
       name: {
         type: Sequelize.STRING,
