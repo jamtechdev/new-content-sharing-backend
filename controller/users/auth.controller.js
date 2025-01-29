@@ -91,8 +91,20 @@ exports.signUp = async (req, res) => {
       code: 201,
       message: "User created successfully",
       token,
-
-      data: newUser,
+      data: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        password: hashedPassword,
+        address: newUser.address,
+        phone_number: newUser.phone_number,
+        birthdate: newUser.birthdate,
+        social: newUser.social,
+        bio: newUser.bio,
+        region_id: newUser.region_id,
+        avatar: newUser.avatar,
+        role_id: newUser.role_id,
+      },
     });
   } catch (error) {
     console.log(error);
