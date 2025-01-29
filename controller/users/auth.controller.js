@@ -3,9 +3,7 @@ const jwt = require("jsonwebtoken");
 const db = require("../../models/index.js");
 const User = db.users;
 require("dotenv").config();
-// const User = db.users;
-// const regionDb = db.Regions;
-// const roleDb = db.roles;
+
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$/;
 
 exports.signUp = async (req, res) => {
@@ -25,6 +23,14 @@ exports.signUp = async (req, res) => {
       avatar,
       role_id,
     } = req.body;
+
+    if (name || email || password) {
+      return res.status(400).json({
+        status: 400,
+        success: false,
+        message: "All fields are required",
+      });
+    }
 
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
@@ -73,7 +79,7 @@ exports.signUp = async (req, res) => {
       role_id,
     });
     const token = jwt.sign({ userId: newUser.id }, process.env.JWT_SECRET, {
-      expiresIn: "360d",
+      expiresIn: "15d",
     });
     res.cookie("token", token, {
       httpOnly: true,
@@ -84,7 +90,9 @@ exports.signUp = async (req, res) => {
     return res.status(201).json({
       code: 201,
       message: "User created successfully",
-      userId: newUser.id,
+      token,
+
+      data: newUser,
     });
   } catch (error) {
     console.log(error);
@@ -95,6 +103,14 @@ exports.signUp = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    // validate
+    if (!email || !password) {
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message: "Email and password are required",
+      });
+    }
     const user = await User.findOne({
       where: { email },
       attributes: ["id", "name", "email", "password", "avatar"],

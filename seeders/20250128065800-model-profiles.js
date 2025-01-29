@@ -1,0 +1,98 @@
+"use strict";
+
+module.exports = {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.bulkInsert(
+      "model_profiles",
+      [
+        {
+          user_id: 1,
+          region_id: 2,
+          username: "model_one",
+          bio: "Aspiring model and content creator.",
+          profile_picture: "https://example.com/profile1.jpg",
+          cover_photo: "https://example.com/cover1.jpg",
+          website_url: "https://modelone.com",
+          social_links: JSON.stringify({
+            twitter: "https://twitter.com/modelone",
+            instagram: "https://instagram.com/modelone",
+          }),
+          location: "New York, USA",
+          birthdate: "1995-06-15",
+          gender: "Female",
+          sexual_orientation: "Straight",
+          followers_count: 5000,
+          earnings: 1200.5,
+          subscription_price: 9.99,
+          is_verified: true,
+          is_online: false,
+          is_active: true,
+          premium_access: true,
+          content_visibility: "subscribers_only",
+          status: "approved",
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          user_id: 2,
+          region_id: 3,
+          username: "model_two",
+          bio: "Lover of fashion and photography.",
+          profile_picture: "https://example.com/profile2.jpg",
+          cover_photo: "https://example.com/cover2.jpg",
+          website_url: null,
+          social_links: JSON.stringify({
+            twitter: "https://twitter.com/modeltwo",
+          }),
+          location: "Los Angeles, USA",
+          birthdate: "1998-04-20",
+          gender: "Male",
+          sexual_orientation: "Gay",
+          followers_count: 3000,
+          earnings: 750.0,
+          subscription_price: 5.99,
+          is_verified: false,
+          is_online: true,
+          is_active: true,
+          premium_access: false,
+          content_visibility: "all",
+          status: "pending",
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          user_id: 3,
+          region_id: 1,
+          username: "model_three",
+          bio: "Passionate about travel and modeling.",
+          profile_picture: "https://example.com/profile3.jpg",
+          cover_photo: null,
+          website_url: "https://modelthree.com",
+          social_links: JSON.stringify({
+            instagram: "https://instagram.com/modelthree",
+          }),
+          location: "Paris, France",
+          birthdate: "2000-12-05",
+          gender: "Non-Binary",
+          sexual_orientation: "Bisexual",
+          followers_count: 10000,
+          earnings: 5000.75,
+          subscription_price: 14.99,
+          is_verified: true,
+          is_online: false,
+          is_active: false,
+          premium_access: true,
+          content_visibility: "premium_only",
+          status: "suspended",
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ],
+      {}
+    );
+  },
+
+  async down(queryInterface, Sequelize) {
+    await queryInterface.bulkDelete("model_profiles", null, {});
+  },
+};

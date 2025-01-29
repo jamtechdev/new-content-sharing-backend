@@ -13,7 +13,8 @@ app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", userRouter);
+// user profile route
+app.use("/api/profile", require("./routes/Api/profile/profile.route"));
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
-

@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "role_id",
         as: "users",
       });
+      roles.hasMany(models.model_profile, {
+        foreignKey: "role_id",
+        as: "model_profiles",
+      });
     }
   }
   roles.init(
