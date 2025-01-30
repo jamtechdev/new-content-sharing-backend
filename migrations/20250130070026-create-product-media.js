@@ -2,44 +2,40 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('chat_messages', {
+    await queryInterface.createTable('product_media', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      chat_session_id: {
-        type: Sequelize.INTEGER
-      },
-      sender_id: {
-        type: Sequelize.INTEGER
-      },
-      sender_type: {
-        type: Sequelize.ENUM("user", "model")
-      },
-      message_type: {
-        type: Sequelize.ENUM("text", "image", "video", "audio")
-      },
-      message: {
-        type: Sequelize.STRING
-      },
-      media_url: {
-        type: Sequelize.STRING
+      product_id: {
+        type: Sequelize.INTEGER,
+        // references: {
+        //   model: 'Products',  // References Product table
+        //   key: 'id',          // The column in Products to reference
+        // },
+        // allowNull: false,
       },
       media_type: {
+        type: Sequelize.ENUM('image', 'video', 'document')
+      },
+      file_url: {
         type: Sequelize.STRING
       },
-      media_size: {
+      file_name: {
+        type: Sequelize.STRING
+      },
+      file_size: {
         type: Sequelize.INTEGER
       },
-      timestamp: {
-        type: Sequelize.DATE
+      file_extension: {
+        type: Sequelize.STRING
       },
-      is_deleted: {
+      is_main: {
         type: Sequelize.BOOLEAN
       },
-      is_edited: {
+      is_gallery: {
         type: Sequelize.BOOLEAN
       },
       createdAt: {
@@ -53,6 +49,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('chat_messages');
+    await queryInterface.dropTable('product_media');
   }
 };

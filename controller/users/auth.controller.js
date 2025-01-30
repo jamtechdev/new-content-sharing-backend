@@ -160,9 +160,13 @@ exports.login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "15d",
-    });
+    const token = jwt.sign(
+      { userId: user.id, role: user?.role?.name },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "15d",
+      }
+    );
     res.cookie("token", token, {
       httpOnly: true,
       maxAge: 15 * 24 * 60 * 60 * 1000,
@@ -187,6 +191,38 @@ exports.login = async (req, res) => {
       message: "Internal server error",
       error: error.message,
     });
+  }
+};
+
+exports.update = async (req, res) => {
+  try {
+    const { id } = req?.params;
+    const user = req?.user;
+    const formdata = req?.body;
+    if (id != user?.user?.userId && formdata?.role != user?.user?.role) {
+      return res.status(401).json({
+        error: true,
+        message: "Unauthorised Role! You are not allowed to this action.",
+      });
+    }
+    const response = await User.update(formdata, {
+      where: {
+        id: id,
+      },
+    });
+    if (response[0] === 0) {
+      return res.status(404).json({
+        error: true,
+        message: "Id not found in table!",
+      });
+    }
+
+    return res.status(200).json({
+      status : true,
+      message:"User details updated successfully."
+    });
+  } catch (error) {
+    return res.status(500).json(error);
   }
 };
 
