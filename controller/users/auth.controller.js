@@ -325,7 +325,7 @@ exports.forgotPassword = async (req, res) => {
             </div>
         </body>
         </html>`;
-    await mailToSpecificUser("shivammaurya234@gmail.com", subject, content);
+    await mailToSpecificUser(user.email, subject, content);
     return res.status(200).json({success: true, message: "Password reset link sent to you mail"})
   } catch (error) {
     return res.status(500).json({success: false, message: error.message });
@@ -336,9 +336,13 @@ exports.resetPassword = async (req, res)=>{
   try {
     const {token, password, confirmPassword} = req.body
     const decoded = jwt.verify(token, process.env.RESET_PASSWORD_KEY)
-    console.log(decoded)
-    const user = await User.findOne({where: {id: decoded.id, email: decoded.email}});
-    if (!user || user.role_id !== 3) {
+    const user = await User.findOne({where: {id: decoded.id, email: decoded.email}, include: [{
+      model: db.roles,
+      as: "role",
+      attributes: ["name", "guard_name"],
+    },] });
+
+    if (!user || user.role.name !== "user") {
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
