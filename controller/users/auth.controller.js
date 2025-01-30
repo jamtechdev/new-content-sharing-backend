@@ -233,7 +233,6 @@ exports.loginWithGoogle = async (req, res) => {
         },
       });
     } else {
-      console.log("else block");
       const newUser = await User.create({
         email,
         name,
@@ -241,7 +240,7 @@ exports.loginWithGoogle = async (req, res) => {
         access_token: accessToken,
         role_id: 3,
         password: "Password@123#",
-        platform_type: "google",
+        platfrom_type: "google",
       });
       const token = jwt.sign({ userId: newUser.id }, process.env.JWT_SECRET, {
         expiresIn: "15d",
