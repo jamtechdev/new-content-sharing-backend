@@ -49,6 +49,14 @@ module.exports = {
         type: Sequelize.JSON, // Storing social media links as JSON
         allowNull: true,
       },
+      access_token: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      platfrom_type: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
       bio: {
         type: Sequelize.TEXT,
         allowNull: true,
@@ -58,6 +66,10 @@ module.exports = {
         allowNull: true,
       },
       region_id: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
+      role_id: {
         type: Sequelize.INTEGER,
         allowNull: true,
       },
@@ -74,10 +86,10 @@ module.exports = {
         ),
       },
     });
-    await queryInterface.addColumn("users", "role_id", {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-    });
+    // await queryInterface.addColumn("users", "role_id", {
+    //   type: Sequelize.INTEGER,
+    //   allowNull: true,
+    // });
   },
 
   async down(queryInterface, Sequelize) {

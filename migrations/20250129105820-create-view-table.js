@@ -13,22 +13,10 @@ module.exports = {
       user_id: {
         type: Sequelize.INTEGER,
         allowNull: true,
-        references: {
-          model: "Users",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
       },
       content_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: {
-          model: "Contents",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE",
       },
       ip_address: {
         type: Sequelize.STRING(45),

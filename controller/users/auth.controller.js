@@ -189,3 +189,85 @@ exports.login = async (req, res) => {
     });
   }
 };
+
+exports.logout = async (req, res) => {
+  try {
+    res.clearCookie("token");
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: "Logout successful",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+exports.loginWithGoogle = async (req, res) => {
+  try {
+    const { accessToken, email, name, photoURL } = req.body;
+    console.log(req.body);
+    const user = await User.findOne({ where: { email } });
+    if (user) {
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+        expiresIn: "15d",
+      });
+      res.cookie("token", token, {
+        httpOnly: true,
+        maxAge: 15 * 24 * 60 * 60 * 1000,
+        path: "/",
+      });
+      return res.status(200).json({
+        token,
+        data: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          role_id: user.role_id,
+        },
+      });
+    } else {
+      console.log("else block");
+      const newUser = await User.create({
+        email,
+        name,
+        avatar: photoURL,
+        access_token: accessToken,
+        role_id: 3,
+        password: "Password@123#",
+        platform_type: "google",
+      });
+      const token = jwt.sign({ userId: newUser.id }, process.env.JWT_SECRET, {
+        expiresIn: "15d",
+      });
+      res.cookie("token", token, {
+        httpOnly: true,
+        maxAge: 15 * 24 * 60 * 60 * 1000,
+        path: "/",
+      });
+      return res.status(200).json({
+        token,
+        data: {
+          id: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+          avatar: newUser.avatar,
+          role_id: newUser.role_id,
+        },
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};

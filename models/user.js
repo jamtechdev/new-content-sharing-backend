@@ -56,6 +56,14 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: false,
       },
+      access_token: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      platfrom_type: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       address: {
         type: DataTypes.STRING,
         allowNull: true,
