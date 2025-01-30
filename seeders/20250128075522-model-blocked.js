@@ -65,6 +65,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("ModelBlocked", null, {});
+    await queryInterface.bulkDelete("model_blocked", null, {});
   },
 };

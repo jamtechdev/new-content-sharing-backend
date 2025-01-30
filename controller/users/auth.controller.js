@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const db = require("../../models/index.js");
 const User = db.users;
 require("dotenv").config();
+const mailToSpecificUser = require("../../utils/emailService.js");
 
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$/;
 
@@ -276,3 +277,89 @@ exports.loginWithGoogle = async (req, res) => {
     });
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({where: {email}});
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+    let payload = {
+      id: user.id,
+      email: user.email
+    }
+    const resetToken = jwt.sign(payload, process.env.RESET_PASSWORD_KEY, { expiresIn: '5m' })
+    const subject = `Password reset mail to: ${user.email}`;
+    const content = `
+        <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              color: #333;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+              background-color: #f9f9f9;
+            }
+            h1 {
+              color: #007bff;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Dear ${user.email},</h1>
+            <p>Kindly reset your password using this given link.</p>
+            <p>Password reset link: <strong style="color: #007bff;"><button><a href='${process.env.CLIENT_SIDE_URI}?token=${resetToken}'>Verify Email</a></button></strong></p>
+            <p>Please click on link to reset your password</p>
+            <p>If you have any queries, feel free to contact us.</p>
+            <p>Regards,<br>Content Sharing</p>
+            </div>
+        </body>
+        </html>`;
+    await mailToSpecificUser("shivammaurya234@gmail.com", subject, content);
+    return res.status(200).json({success: true, message: "Password reset link sent to you mail"})
+  } catch (error) {
+    return res.status(500).json({success: false, message: error.message });
+  }
+};
+
+exports.resetPassword = async (req, res)=>{
+  try {
+    const {token, password, confirmPassword} = req.body
+    const decoded = jwt.verify(token, process.env.RESET_PASSWORD_KEY)
+    console.log(decoded)
+    const user = await User.findOne({where: {id: decoded.id, email: decoded.email}});
+    if (!user || user.role_id !== 3) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+      }
+      if(password !== confirmPassword){
+        return res.status(400).json({success: false, message: "New password and confirm password should be the same"})
+      }
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message:
+          "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character.",
+      });
+    }
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(password, salt)
+    await User.update({password: hashedPassword}, {where: {id: user.id, email: user.email}})
+    return res.status(201).json({success: true, message: "User's password updated successfully"})
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({success: false, message: error.message})
+  }
+}

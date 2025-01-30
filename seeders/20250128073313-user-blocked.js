@@ -47,6 +47,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("UserBlocked", null, {});
+    await queryInterface.bulkDelete("user_blocked", null, {});
   },
 };

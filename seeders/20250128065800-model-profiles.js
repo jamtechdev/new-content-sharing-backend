@@ -30,8 +30,8 @@ module.exports = {
           premium_access: true,
           content_visibility: "subscribers_only",
           status: "approved",
-          created_at: new Date(),
-          updated_at: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
         {
           user_id: 2,
@@ -57,8 +57,8 @@ module.exports = {
           premium_access: false,
           content_visibility: "all",
           status: "pending",
-          created_at: new Date(),
-          updated_at: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
         {
           user_id: 3,
@@ -84,8 +84,8 @@ module.exports = {
           premium_access: true,
           content_visibility: "premium_only",
           status: "suspended",
-          created_at: new Date(),
-          updated_at: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       ],
       {}

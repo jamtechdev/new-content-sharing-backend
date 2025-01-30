@@ -4,17 +4,18 @@ const {
   login,
   loginWithGoogle,
   logout,
+  forgotPassword,
+  resetPassword
 } = require("../../../controller/users/auth.controller");
-const { authenticateToken } = require("../../../middleware/middleware");
-const {
-  updateUserById,
-} = require("../../../controller/profile/profile.controller");
+const { authenticateToken, userProtect } = require("../../../middleware/middleware");
 const router = express.Router();
 
 router.post("/signup", signUp);
 router.post("/login", login);
 router.post("/logout", logout);
 router.post("/login-with-google", loginWithGoogle);
+router.post('/forgot-password', forgotPassword)
+router.post('/reset-password', resetPassword)
 
 
 module.exports = router;

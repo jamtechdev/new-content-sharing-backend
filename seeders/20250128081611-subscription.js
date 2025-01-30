@@ -87,6 +87,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("Subscription", null, {});
+    await queryInterface.bulkDelete("subscription_table", null, {});
   },
 };
