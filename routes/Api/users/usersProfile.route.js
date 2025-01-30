@@ -2,6 +2,7 @@ const express = require("express");
 const {
   getModalProfileById,
   createModalProfile,
+  updateUserById,
 } = require("../../../controller/profile/profile.controller");
 const { authenticateToken } = require("../../../middleware/middleware");
 const router = express.Router();
@@ -15,5 +16,6 @@ router.get(
   authenticateToken,
   getModalProfileById
 );
+router.put("/update-user/:id", authenticateToken, updateUserById);
 
 module.exports = router;
