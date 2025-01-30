@@ -195,8 +195,6 @@ exports.login = async (req, res) => {
   }
 };
 
-
-
 exports.logout = async (req, res) => {
   try {
     res.clearCookie("token");
@@ -336,7 +334,6 @@ exports.resetPassword = async (req, res)=>{
   try {
     const {token, password, confirmPassword} = req.body
     const decoded = jwt.verify(token, process.env.RESET_PASSWORD_KEY)
-    console.log(decoded)
     const user = await User.findOne({where: {id: decoded.id, email: decoded.email}});
     if (!user || user.role_id !== 3) {
       return res
