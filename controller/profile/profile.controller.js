@@ -204,7 +204,7 @@ exports.getMyProfile = async (req, res) => {
       code: 200,
       message: "User profile retrieved successfully",
       status: true,
-      UserData,
+      data: UserData,
     });
   } catch (error) {}
 };
