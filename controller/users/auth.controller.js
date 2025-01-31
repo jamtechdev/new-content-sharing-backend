@@ -4,6 +4,7 @@ const db = require("../../models/index.js");
 const User = db.users;
 require("dotenv").config();
 const mailToSpecificUser = require("../../utils/emailService.js");
+const cloudinaryImageUpload = require('../../config/cloudinaryConfig.js')
 
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$/;
 
@@ -24,7 +25,12 @@ exports.signUp = async (req, res) => {
       avatar,
       role_id,
     } = req.body;
-    console.log(req.body);
+    // const avatar = req.file
+    // console.log("Avatar file path", req.file)
+    // if (!req.file) {
+    //   return res.status(400).json({code: 400, success: false, message: 'No file uploaded' });
+    // }
+    // const avatarImageUri = await cloudinaryImageUpload(avatar.path)
     if (!name || !email || !password) {
       return res.status(400).json({
         status: 400,
