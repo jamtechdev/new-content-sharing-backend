@@ -221,7 +221,13 @@ exports.uploadAvatar = async (req, res) => {
         message: "No file uploaded",
       });
     }
-    const existing_user = await User.findOne({ where: { id: user?.userId } });
+    const existing_user = await User.findOne({ where: { id: user?.userId }
+
+    
+    
+    
+    
+    });
     if (!existing_user) {
       return res.status(404).json({
         code: 404,
@@ -230,7 +236,6 @@ exports.uploadAvatar = async (req, res) => {
       });
     }
     const uploadedAvatar = await cloudinaryImageUpload(avatar?.path);
-    console.log("uploadedAvatar", uploadedAvatar);
     if (uploadedAvatar?.error) {
       return res.status(400).json({
         code: 400,
@@ -244,7 +249,8 @@ exports.uploadAvatar = async (req, res) => {
       { where: { id: user?.userId } }
     );
     // Fetch the updated user data
-    const updatedUser = await User.findOne({ where: { id: user?.userId } });
+    const updatedUser = await User.findOne({ where: { id: user?.userId  },
+      attributes: ["id", "name", "email", "avatar", "address", "phone_number", "birthdate", "social_links", "bio"],});
     return res.status(200).json({
       code: 200,
       success: true,
