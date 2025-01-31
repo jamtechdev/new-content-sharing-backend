@@ -6,7 +6,7 @@ const {
   getMyProfile,
   uploadAvatar,
 } = require("../../../controller/profile/profile.controller");
-const { authenticateToken } = require("../../../middleware/middleware");
+const { authenticateToken, userProtect } = require("../../../middleware/middleware");
 const { upload } = require("../../../middleware/multerConfig");
 const {
   cloudinaryImageUpload,
@@ -29,6 +29,7 @@ router.put("/my-profile-update", authenticateToken, updateUserById);
 router.post(
   "/upload-avatar",
   authenticateToken,
+  userProtect,
   upload.single("avatar"),
   uploadAvatar
 );

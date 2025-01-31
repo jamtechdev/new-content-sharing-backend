@@ -221,14 +221,6 @@ exports.uploadAvatar = async (req, res) => {
         message: "No file uploaded",
       });
     }
-    // Handling user validation
-    if (!user?.userId && user?.role != "user") {
-      return res.status(401).json({
-        error: true,
-        message:
-          "Unauthorized Role! You are not allowed to perform this action.",
-      });
-    }
     const existing_user = await User.findOne({ where: { id: user?.userId } });
     if (!existing_user) {
       return res.status(404).json({

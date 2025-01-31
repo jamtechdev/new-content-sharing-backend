@@ -18,6 +18,7 @@ const authenticateToken = (req, res, next) => {
         });
       }
       req.user = user;
+      
       console.log(req.user);
       next();
     });
@@ -42,7 +43,9 @@ const userProtect = (req, res, next) => {
   if (role !== "user") {
     return res
       .status(403)
-      .json({ message: "Unauthorized access: User role required" });
+      .json({ 
+        code: 403,
+        message: "Unauthorized access: User role required" });
   }
   next();
 };
