@@ -39,7 +39,6 @@ exports.signUp = async (req, res) => {
         message: "All fields are required",
       });
     }
-
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
         status: 400,
@@ -48,15 +47,6 @@ exports.signUp = async (req, res) => {
           "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character.",
       });
     }
-
-    // if (!region_id) {
-    //   return res.status(400).json({
-    //     status: 400,
-    //     success: false,
-    //     message: "Region is required",
-    //   });
-    // }
-
     if (!role_id) {
       return res.status(400).json({
         status: 400,
@@ -292,7 +282,7 @@ exports.loginWithGoogle = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({where: {email}});
+    const user = await User.findOne({ where: { email } });
     if (!user) {
       return res
         .status(404)
@@ -300,9 +290,13 @@ exports.forgotPassword = async (req, res) => {
     }
     let payload = {
       id: user.id,
-      email: user.email
-    }
-    const resetToken = jwt.sign(payload, process.env.RESET_PASSWORD_SECRET_KEY, { expiresIn: '5m' })
+      email: user.email,
+    };
+    const resetToken = jwt.sign(
+      payload,
+      process.env.RESET_PASSWORD_SECRET_KEY,
+      { expiresIn: "5m" }
+    );
     const subject = `Password reset mail to: ${user.email}`;
     const content = `
         <html>
@@ -343,7 +337,7 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-exports.resetPassword = async (req, res)=>{
+exports.resetPassword = async (req, res) => {
   try {
     const {token, email, password} = req.body
     const decoded = jwt.verify(token, process.env.RESET_PASSWORD_SECRET_KEY)
@@ -381,4 +375,4 @@ exports.resetPassword = async (req, res)=>{
     }
     return res.status(500).json({code:500,success: false, message: error.message})
   }
-}
+};
