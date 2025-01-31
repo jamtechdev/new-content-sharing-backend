@@ -4,8 +4,6 @@ const db = require("../../models/index.js");
 const User = db.users;
 require("dotenv").config();
 const mailToSpecificUser = require("../../utils/emailService.js");
-const cloudinaryImageUpload = require('../../config/cloudinaryConfig.js')
-
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$/;
 
 exports.signUp = async (req, res) => {
@@ -25,12 +23,6 @@ exports.signUp = async (req, res) => {
       avatar,
       role_id,
     } = req.body;
-    // const avatar = req.file
-    // console.log("Avatar file path", req.file)
-    // if (!req.file) {
-    //   return res.status(400).json({code: 400, success: false, message: 'No file uploaded' });
-    // }
-    // const avatarImageUri = await cloudinaryImageUpload(avatar.path)
     if (!name || !email || !password) {
       return res.status(400).json({
         status: 400,
@@ -38,7 +30,6 @@ exports.signUp = async (req, res) => {
         message: "All fields are required",
       });
     }
-
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
         status: 400,
@@ -47,15 +38,6 @@ exports.signUp = async (req, res) => {
           "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character.",
       });
     }
-
-    // if (!region_id) {
-    //   return res.status(400).json({
-    //     status: 400,
-    //     success: false,
-    //     message: "Region is required",
-    //   });
-    // }
-
     if (!role_id) {
       return res.status(400).json({
         status: 400,
@@ -285,7 +267,7 @@ exports.loginWithGoogle = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({where: {email}});
+    const user = await User.findOne({ where: { email } });
     if (!user) {
       return res
         .status(404)
@@ -293,9 +275,13 @@ exports.forgotPassword = async (req, res) => {
     }
     let payload = {
       id: user.id,
-      email: user.email
-    }
-    const resetToken = jwt.sign(payload, process.env.RESET_PASSWORD_SECRET_KEY, { expiresIn: '5m' })
+      email: user.email,
+    };
+    const resetToken = jwt.sign(
+      payload,
+      process.env.RESET_PASSWORD_SECRET_KEY,
+      { expiresIn: "5m" }
+    );
     const subject = `Password reset mail to: ${user.email}`;
     const content = `
         <html>
@@ -322,7 +308,7 @@ exports.forgotPassword = async (req, res) => {
           <div class="container">
             <h1>Dear ${user.email},</h1>
             <p>Kindly reset your password using this given link.</p>
-            <p>Password reset link: <strong style="color: #007bff;"><button><a href='${process.env.CLIENT_SIDE_URI}?token=${resetToken}'>Verify Email</a></button></strong></p>
+            <p>Password reset link: <strong style="color: #007bff;"><button><a href='${process.env.CLIENT_SIDE_URI}/reset-password?token=${resetToken}#'>Verify Email</a></button></strong></p>
             <p>Please click on link to reset your password</p>
             <p>If you have any queries, feel free to contact us.</p>
             <p>Regards,<br>Content Sharing</p>
@@ -330,30 +316,40 @@ exports.forgotPassword = async (req, res) => {
         </body>
         </html>`;
     await mailToSpecificUser(user.email, subject, content);
-    return res.status(200).json({success: true, message: "Password reset link sent to you mail"})
+    return res
+      .status(200)
+      .json({ success: true, message: "Password reset link sent to you mail" });
   } catch (error) {
-    return res.status(500).json({success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-exports.resetPassword = async (req, res)=>{
+exports.resetPassword = async (req, res) => {
   try {
-    const {token, password, confirmPassword} = req.body
-    const decoded = jwt.verify(token, process.env.RESET_PASSWORD_SECRET_KEY)
-    const user = await User.findOne({where: {id: decoded.id, email: decoded.email}, include: [{
-      model: db.roles,
-      as: "role",
-      attributes: ["name", "guard_name"],
-    },] });
+    const { token, password, confirmPassword } = req.body;
+    const decoded = jwt.verify(token, process.env.RESET_PASSWORD_SECRET_KEY);
+    const user = await User.findOne({
+      where: { id: decoded.id, email: decoded.email },
+      include: [
+        {
+          model: db.roles,
+          as: "role",
+          attributes: ["name", "guard_name"],
+        },
+      ],
+    });
 
     if (!user || user.role.name !== "user") {
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
-      }
-      if(password !== confirmPassword){
-        return res.status(400).json({success: false, message: "New password and confirm password should be the same"})
-      }
+    }
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New password and confirm password should be the same",
+      });
+    }
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
         code: 400,
@@ -363,14 +359,21 @@ exports.resetPassword = async (req, res)=>{
       });
     }
     const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(password, salt)
-    await User.update({password: hashedPassword}, {where: {id: user.id, email: user.email}})
-    return res.status(201).json({success: true, message: "User's password updated successfully"})
+    const hashedPassword = await bcrypt.hash(password, salt);
+    await User.update(
+      { password: hashedPassword },
+      { where: { id: user.id, email: user.email } }
+    );
+    return res
+      .status(201)
+      .json({ success: true, message: "User's password updated successfully" });
   } catch (error) {
-    console.log(error)
-    if (error.name === 'TokenExpiredError') {
-      return res.status(400).json({ success: false, message: 'Reset token has expired' });
+    console.log(error);
+    if (error.name === "TokenExpiredError") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Reset token has expired" });
     }
-    return res.status(500).json({success: false, message: error.message})
+    return res.status(500).json({ success: false, message: error.message });
   }
-}
+};

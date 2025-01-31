@@ -117,7 +117,7 @@ exports.createModalProfile = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-// get profile by id
+// get Modal  profile by id
 exports.getModalProfileById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -136,8 +136,6 @@ exports.getModalProfileById = async (req, res) => {
           attributes: ["name"],
         },
       ],
-      raw: true,
-      nest: true,
     });
     if (!profile) {
       return res.status(404).json({
@@ -157,4 +155,56 @@ exports.getModalProfileById = async (req, res) => {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
+};
+
+// getUserProfile
+exports.getMyProfile = async (req, res) => {
+  try {
+    const user = req?.user;
+    console.log(user);
+
+    if (user?.userId && "user" != user?.role) {
+      return res.status(401).json({
+        error: true,
+        message: "Unauthorised Role! You are not allowed to this action.",
+      });
+    }
+    const UserData = await User.findOne({
+      where: { id: user?.userId },
+      attributes: [
+        "id",
+        "name",
+        "email",
+        "avatar",
+        "address",
+        "phone_number",
+        "birthdate",
+        "social_links",
+        "bio",
+      ],
+      include: [
+        {
+          model: Region,
+          as: "region",
+          attributes: ["name"],
+        },
+      ],
+      raw: true,
+      nest: true,
+    });
+    if (!UserData) {
+      return res.status(404).json({
+        code: 404,
+        status: false,
+
+        message: "profile not found",
+      });
+    }
+    return res.status(200).json({
+      code: 200,
+      message: "User profile retrieved successfully",
+      status: true,
+      UserData,
+    });
+  } catch (error) {}
 };

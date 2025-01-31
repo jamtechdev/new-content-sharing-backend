@@ -3,6 +3,7 @@ const {
   getModalProfileById,
   createModalProfile,
   updateUserById,
+  getMyProfile,
 } = require("../../../controller/profile/profile.controller");
 const { authenticateToken } = require("../../../middleware/middleware");
 const cloudinaryImageUpload = require("../../../config/cloudinaryConfig");
@@ -17,6 +18,10 @@ router.get(
   authenticateToken,
   getModalProfileById
 );
-router.put("/update-user", authenticateToken, updateUserById);
+// get my profile
+router.get("/get-my-profile", authenticateToken, getMyProfile)
+// update my profile
+router.put("/my-profile-update", authenticateToken, updateUserById);
+
 
 module.exports = router;
