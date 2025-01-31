@@ -6,8 +6,6 @@ const {
   getMyProfile,
 } = require("../../../controller/profile/profile.controller");
 const { authenticateToken } = require("../../../middleware/middleware");
-const cloudinaryImageUpload = require("../../../config/cloudinaryConfig");
-const {upload} = require('../../../middleware/multerConfig')
 const router = express.Router();
 
 // create modal Profile api
