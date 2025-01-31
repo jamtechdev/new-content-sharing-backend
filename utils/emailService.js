@@ -1,4 +1,4 @@
-const { transporter } = require("../config/appConfig");
+const { transporter } = require("../config/mailConfig");
 require('dotenv').config()
 
 function mailToSpecificUser(to, subject, content) {
