@@ -24,7 +24,7 @@ exports.signUp = async (req, res) => {
       social,
       bio,
       region_id,
-      // avatar,
+      avatar,
       role_id,
     } = req.body;
     if (!name || !email || !password) {
