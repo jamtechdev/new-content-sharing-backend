@@ -16,6 +16,6 @@ router.get(
   authenticateToken,
   getModalProfileById
 );
-router.put("/update-user/:id", authenticateToken, updateUserById);
+router.put("/update-user", authenticateToken, updateUserById);
 
 module.exports = router;
