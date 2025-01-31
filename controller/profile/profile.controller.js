@@ -10,7 +10,7 @@ exports.updateUserById = async (req, res) => {
   try {
     const user = req?.user;
     const formdata = req?.body;
-    if (user?.userId && "user" != user?.role) {
+    if (!user?.userId && user?.role != "user") {
       return res.status(401).json({
         error: true,
         message: "Unauthorised Role! You are not allowed to this action.",
