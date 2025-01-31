@@ -222,7 +222,7 @@ exports.uploadAvatar = async (req, res) => {
       });
     }
     // Handling user validation
-    if (user?.userId && "user" != user?.role) {
+    if (!user?.userId && user?.role != "user") {
       return res.status(401).json({
         error: true,
         message:
@@ -257,7 +257,7 @@ exports.uploadAvatar = async (req, res) => {
       code: 200,
       success: true,
       message: "Avatar uploaded successfully",
-      data: updatedUser, 
+      data: updatedUser,
     });
   } catch (error) {
     console.error("Error uploading avatar:", error);
