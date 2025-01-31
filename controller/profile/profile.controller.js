@@ -8,10 +8,9 @@ const Profile = db.model_profile;
 
 exports.updateUserById = async (req, res) => {
   try {
-    const { id } = req?.params;
     const user = req?.user;
     const formdata = req?.body;
-    if (id != user?.user?.userId && formdata?.role != user?.user?.role) {
+    if (user?.userId && "user" != user?.role) {
       return res.status(401).json({
         error: true,
         message: "Unauthorised Role! You are not allowed to this action.",
@@ -19,7 +18,7 @@ exports.updateUserById = async (req, res) => {
     }
     const response = await User.update(formdata, {
       where: {
-        id: id,
+        id: user?.userId,
       },
     });
     if (response[0] === 0) {
@@ -159,4 +158,3 @@ exports.getModalProfileById = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
