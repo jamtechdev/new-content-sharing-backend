@@ -4,9 +4,13 @@ const {
   createModalProfile,
   updateUserById,
   getMyProfile,
+  uploadAvatar,
 } = require("../../../controller/profile/profile.controller");
 const { authenticateToken } = require("../../../middleware/middleware");
 const { upload } = require("../../../middleware/multerConfig");
+const {
+  cloudinaryImageUpload,
+} = require("../../../services/cloudinaryService");
 const router = express.Router();
 
 // create modal Profile api
@@ -20,10 +24,13 @@ router.get(
 // get my profile
 router.get("/get-my-profile", authenticateToken, getMyProfile);
 // update my profile
-router.put(
-  "/my-profile-update",
+router.put("/my-profile-update", authenticateToken, updateUserById);
+// upload avatar
+router.post(
+  "/upload-avatar",
   authenticateToken,
-  updateUserById
+  upload.single("avatar"),
+  uploadAvatar
 );
 
 module.exports = router;

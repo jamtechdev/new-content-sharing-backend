@@ -1,5 +1,8 @@
 require("dotenv").config();
 const db = require("../../models/index.js");
+const {
+  cloudinaryImageUpload,
+} = require("../../services/cloudinaryService.js");
 const User = db.users;
 const Region = db.Regions;
 const Profile = db.model_profile;
@@ -204,4 +207,64 @@ exports.getMyProfile = async (req, res) => {
       data: UserData,
     });
   } catch (error) {}
+};
+
+// upload Aavart and Update
+exports.uploadAvatar = async (req, res) => {
+  try {
+    const user = req?.user;
+    const avatar = req?.file;
+    if (!avatar) {
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+    // Handling user validation
+    if (user?.userId && "user" != user?.role) {
+      return res.status(401).json({
+        error: true,
+        message:
+          "Unauthorized Role! You are not allowed to perform this action.",
+      });
+    }
+    const existing_user = await User.findOne({ where: { id: user?.userId } });
+    if (!existing_user) {
+      return res.status(404).json({
+        code: 404,
+        success: false,
+        message: "User not found",
+      });
+    }
+    const uploadedAvatar = await cloudinaryImageUpload(avatar?.path);
+    console.log("uploadedAvatar", uploadedAvatar);
+    if (uploadedAvatar?.error) {
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message: uploadedAvatar?.error,
+      });
+    }
+    // Update user's avatar
+    await User.update(
+      { avatar: uploadedAvatar },
+      { where: { id: user?.userId } }
+    );
+    // Fetch the updated user data
+    const updatedUser = await User.findOne({ where: { id: user?.userId } });
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: "Avatar uploaded successfully",
+      data: updatedUser, 
+    });
+  } catch (error) {
+    console.error("Error uploading avatar:", error);
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: "Internal server error",
+    });
+  }
 };
