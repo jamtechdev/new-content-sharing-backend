@@ -5,8 +5,8 @@ const {
   updateUserById,
 } = require("../../../controller/profile/profile.controller");
 const { authenticateToken } = require("../../../middleware/middleware");
-const cloudinaryImageUpload = require("../../../config/cloudinaryConfig");
-const {upload} = require('../../../middleware/multerConfig')
+// const cloudinaryImageUpload = require('../../../services/cloudinaryService')
+// const {upload} = require('../../../middleware/multerConfig')
 const router = express.Router();
 
 // create modal Profile api
@@ -20,6 +20,6 @@ router.get(
 // update user API
 router.put("/update-user/:id", authenticateToken, updateUserById);
 // upload Image
-router.post('/upload-image', cloudinaryImageUpload)
+// router.post('/upload-image', upload.single('avatar'), cloudinaryImageUpload)
 
 module.exports = router;

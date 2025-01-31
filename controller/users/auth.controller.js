@@ -3,8 +3,8 @@ const jwt = require("jsonwebtoken");
 const db = require("../../models/index.js");
 const User = db.users;
 require("dotenv").config();
-const mailToSpecificUser = require("../../utils/emailService.js");
-const cloudinaryImageUpload = require('../../config/cloudinaryConfig.js')
+const mailToSpecificUser = require("../../services/emailService.js");
+const {cloudinaryImageUpload} = require('../../services/cloudinaryService.js')
 
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$/;
 
@@ -22,15 +22,16 @@ exports.signUp = async (req, res) => {
       social,
       bio,
       region_id,
-      avatar,
+      // avatar,
       role_id,
     } = req.body;
-    // const avatar = req.file
-    // console.log("Avatar file path", req.file)
-    // if (!req.file) {
-    //   return res.status(400).json({code: 400, success: false, message: 'No file uploaded' });
-    // }
-    // const avatarImageUri = await cloudinaryImageUpload(avatar.path)
+    const avatar = req.file
+    console.log("Avatar file path", req.file)
+    if (!req.file) {
+      return res.status(400).json({code: 400, success: false, message: 'No file uploaded' });
+    }
+    const avatarImageUri = await cloudinaryImageUpload(avatar.path)
+    console.log("Avatar image uri=======>", avatarImageUri)
     if (!name || !email || !password) {
       return res.status(400).json({
         status: 400,
@@ -87,7 +88,7 @@ exports.signUp = async (req, res) => {
       social,
       bio,
       region_id,
-      avatar,
+      avatar: avatarImageUri,
       role_id,
     });
     const token = jwt.sign({ userId: newUser.id }, process.env.JWT_SECRET, {
