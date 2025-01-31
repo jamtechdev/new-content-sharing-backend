@@ -4,7 +4,9 @@ const db = require("../../models/index.js");
 const User = db.users;
 require("dotenv").config();
 const mailToSpecificUser = require("../../services/emailService.js");
-const {cloudinaryImageUpload} = require('../../services/cloudinaryService.js')
+const {
+  cloudinaryImageUpload,
+} = require("../../services/cloudinaryService.js");
 
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$/;
 
@@ -84,7 +86,6 @@ exports.signUp = async (req, res) => {
     return res.status(201).json({
       code: 201,
       message: "User created successfully",
-      token,
       data: {
         id: newUser.id,
         name: newUser.name,
@@ -102,7 +103,7 @@ exports.signUp = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).send({code:500, success: false, message: error });
+    return res.status(500).send({ code: 500, success: false, message: error });
   }
 };
 // Login API
@@ -162,7 +163,7 @@ exports.login = async (req, res) => {
       path: "/",
     });
     return res.status(200).json({
-      code:200,
+      code: 200,
       token,
       data: {
         id: user.id,
@@ -196,7 +197,7 @@ exports.logout = async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({
-      code:500,
+      code: 500,
       success: false,
       message: "Internal server error",
       error: error.message,
@@ -248,7 +249,7 @@ exports.loginWithGoogle = async (req, res) => {
         path: "/",
       });
       return res.status(200).json({
-        code:200,
+        code: 200,
         token,
         data: {
           id: newUser.id,
@@ -277,7 +278,7 @@ exports.forgotPassword = async (req, res) => {
     if (!user) {
       return res
         .status(404)
-        .json({code: 404, success: false, message: "User not found" });
+        .json({ code: 404, success: false, message: "User not found" });
     }
     let payload = {
       id: user.id,
@@ -322,31 +323,45 @@ exports.forgotPassword = async (req, res) => {
         </body>
         </html>`;
     await mailToSpecificUser(user.email, subject, content);
-    return res.status(200).json({code:200,success: true, message: "Password reset link sent to you mail"})
+    return res
+      .status(200)
+      .json({
+        code: 200,
+        success: true,
+        message: "Password reset link sent to you mail",
+      });
   } catch (error) {
-    return res.status(500).json({code:500,success: false, message: error.message });
+    return res
+      .status(500)
+      .json({ code: 500, success: false, message: error.message });
   }
 };
 
 exports.resetPassword = async (req, res) => {
   try {
-    const {token, email, password} = req.body
-    const decoded = jwt.verify(token, process.env.RESET_PASSWORD_SECRET_KEY)
-    const user = await User.findOne({where: {id: decoded.id, email:email}, include: [{
-      model: db.roles,
-      as: "role",
-      attributes: ["name", "guard_name"],
-    },] });
+    const { token, email, password } = req.body;
+    const decoded = jwt.verify(token, process.env.RESET_PASSWORD_SECRET_KEY);
+    const user = await User.findOne({
+      where: { id: decoded.id, email: email },
+      include: [
+        {
+          model: db.roles,
+          as: "role",
+          attributes: ["name", "guard_name"],
+        },
+      ],
+    });
 
     if (!user || user.role.name !== "user") {
-      return res
-        .status(404)
-        .json({
-          code:404, success: false, message: "User not found" });
-      }
-      // if(password !== confirmPassword){
-      //   return res.status(400).json({success: false, message: "New password and confirm password should be the same"})
-      // }
+      return res.status(404).json({
+        code: 404,
+        success: false,
+        message: "User not found",
+      });
+    }
+    // if(password !== confirmPassword){
+    //   return res.status(400).json({success: false, message: "New password and confirm password should be the same"})
+    // }
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
         code: 400,
@@ -356,14 +371,31 @@ exports.resetPassword = async (req, res) => {
       });
     }
     const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(password, salt)
-    await User.update({password: hashedPassword}, {where: {id: user.id, email: user.email}})
-    return res.status(201).json({code: 201, success: true, message: "User's password updated successfully"})
+    const hashedPassword = await bcrypt.hash(password, salt);
+    await User.update(
+      { password: hashedPassword },
+      { where: { id: user.id, email: user.email } }
+    );
+    return res
+      .status(201)
+      .json({
+        code: 201,
+        success: true,
+        message: "User's password updated successfully",
+      });
   } catch (error) {
-    console.log(error)
-    if (error.name === 'TokenExpiredError') {
-      return res.status(400).json({code:400, success: false, message: 'Reset token has expired' });
+    console.log(error);
+    if (error.name === "TokenExpiredError") {
+      return res
+        .status(400)
+        .json({
+          code: 400,
+          success: false,
+          message: "Reset token has expired",
+        });
     }
-    return res.status(500).json({code:500,success: false, message: error.message})
+    return res
+      .status(500)
+      .json({ code: 500, success: false, message: error.message });
   }
 };
