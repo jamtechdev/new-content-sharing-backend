@@ -24,7 +24,6 @@ exports.signUp = async (req, res) => {
       avatar,
       role_id,
     } = req.body;
-
     if (!name || !email || !password) {
       return res.status(400).json({
         status: 400,
@@ -53,7 +52,6 @@ exports.signUp = async (req, res) => {
       return res.status(400).json({
         status: 400,
         success: false,
-
         message: "Email already registered",
       });
     const salt = await bcrypt.genSalt(12);
@@ -71,7 +69,6 @@ exports.signUp = async (req, res) => {
       social,
       bio,
       region_id,
-      avatar,
       role_id,
     });
     const token = jwt.sign({ userId: newUser.id }, process.env.JWT_SECRET, {
