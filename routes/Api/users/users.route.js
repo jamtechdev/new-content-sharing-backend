@@ -11,7 +11,7 @@ const { authenticateToken, userProtect } = require("../../../middleware/middlewa
 const {upload} = require('../../../middleware/multerConfig')
 const router = express.Router();
 
-router.post("/signup", upload.single('avatar'), signUp);
+router.post("/signup", signUp);
 router.post("/login", login);
 router.post("/logout", logout);
 router.post("/login-with-google", loginWithGoogle);

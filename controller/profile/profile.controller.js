@@ -156,13 +156,10 @@ exports.getModalProfileById = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 // getUserProfile
 exports.getMyProfile = async (req, res) => {
   try {
     const user = req?.user;
-    console.log(user);
-
     if (user?.userId && "user" != user?.role) {
       return res.status(401).json({
         error: true,

@@ -18,7 +18,6 @@ const authenticateToken = (req, res, next) => {
         });
       }
       req.user = user;
-
       next();
     });
   } catch (error) {
@@ -54,8 +53,6 @@ const userProtect = (req, res, next) => {
 //   }
 //  next();
 // };
-
-
 
 module.exports = {
   authenticateToken,

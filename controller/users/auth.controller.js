@@ -59,7 +59,6 @@ exports.signUp = async (req, res) => {
       });
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
-
     const newUser = await User?.create({
       name,
       email,
@@ -74,9 +73,13 @@ exports.signUp = async (req, res) => {
       region_id,
       role_id,
     });
-    const token = jwt.sign({ userId: newUser.id }, process.env.JWT_SECRET, {
-      expiresIn: "15d",
-    });
+    const token = jwt.sign(
+      { userId: newUser.id, role_id: newUser.role_id },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "15d",
+      }
+    );
     res.cookie("token", token, {
       httpOnly: true,
       maxAge: 15 * 24 * 60 * 60 * 1000,
@@ -86,6 +89,7 @@ exports.signUp = async (req, res) => {
     return res.status(201).json({
       code: 201,
       message: "User created successfully",
+      token,
       data: {
         id: newUser.id,
         name: newUser.name,
@@ -323,13 +327,11 @@ exports.forgotPassword = async (req, res) => {
         </body>
         </html>`;
     await mailToSpecificUser(user.email, subject, content);
-    return res
-      .status(200)
-      .json({
-        code: 200,
-        success: true,
-        message: "Password reset link sent to you mail",
-      });
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: "Password reset link sent to you mail",
+    });
   } catch (error) {
     return res
       .status(500)
@@ -376,23 +378,19 @@ exports.resetPassword = async (req, res) => {
       { password: hashedPassword },
       { where: { id: user.id, email: user.email } }
     );
-    return res
-      .status(201)
-      .json({
-        code: 201,
-        success: true,
-        message: "User's password updated successfully",
-      });
+    return res.status(201).json({
+      code: 201,
+      success: true,
+      message: "User's password updated successfully",
+    });
   } catch (error) {
     console.log(error);
     if (error.name === "TokenExpiredError") {
-      return res
-        .status(400)
-        .json({
-          code: 400,
-          success: false,
-          message: "Reset token has expired",
-        });
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message: "Reset token has expired",
+      });
     }
     return res
       .status(500)
