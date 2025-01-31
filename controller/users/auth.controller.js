@@ -280,7 +280,7 @@ exports.forgotPassword = async (req, res) => {
     if (!user) {
       return res
         .status(404)
-        .json({ success: false, message: "User not found" });
+        .json({code: 404, success: false, message: "User not found" });
     }
     let payload = {
       id: user.id,
@@ -317,7 +317,7 @@ exports.forgotPassword = async (req, res) => {
           <div class="container">
             <h1>Dear ${user.email},</h1>
             <p>Kindly reset your password using this given link.</p>
-            <p>Password reset link: <strong style="color: #007bff;"><button><a href='${process.env.CLIENT_SIDE_URI}/reset-password?token=${resetToken}#'>Verify Email</a></button></strong></p>
+            <p>Password reset link: <strong style="color: #007bff;"><button><a href='${process.env.CLIENT_SIDE_URI}?token=${resetToken}#${process.env.ROUTE_UNIQUE_ID}'>Verify Email</a></button></strong></p>
             <p>Please click on link to reset your password</p>
             <p>If you have any queries, feel free to contact us.</p>
             <p>Regards,<br>Content Sharing</p>
@@ -325,40 +325,31 @@ exports.forgotPassword = async (req, res) => {
         </body>
         </html>`;
     await mailToSpecificUser(user.email, subject, content);
-    return res
-      .status(200)
-      .json({ success: true, message: "Password reset link sent to you mail" });
+    return res.status(200).json({code:200,success: true, message: "Password reset link sent to you mail"})
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({code:500,success: false, message: error.message });
   }
 };
 
 exports.resetPassword = async (req, res) => {
   try {
-    const { token, password, confirmPassword } = req.body;
-    const decoded = jwt.verify(token, process.env.RESET_PASSWORD_SECRET_KEY);
-    const user = await User.findOne({
-      where: { id: decoded.id, email: decoded.email },
-      include: [
-        {
-          model: db.roles,
-          as: "role",
-          attributes: ["name", "guard_name"],
-        },
-      ],
-    });
+    const {token, email, password} = req.body
+    const decoded = jwt.verify(token, process.env.RESET_PASSWORD_SECRET_KEY)
+    const user = await User.findOne({where: {id: decoded.id, email:email}, include: [{
+      model: db.roles,
+      as: "role",
+      attributes: ["name", "guard_name"],
+    },] });
 
     if (!user || user.role.name !== "user") {
       return res
         .status(404)
-        .json({ success: false, message: "User not found" });
-    }
-    if (password !== confirmPassword) {
-      return res.status(400).json({
-        success: false,
-        message: "New password and confirm password should be the same",
-      });
-    }
+        .json({
+          code:404, success: false, message: "User not found" });
+      }
+      // if(password !== confirmPassword){
+      //   return res.status(400).json({success: false, message: "New password and confirm password should be the same"})
+      // }
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
         code: 400,
@@ -368,21 +359,14 @@ exports.resetPassword = async (req, res) => {
       });
     }
     const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    await User.update(
-      { password: hashedPassword },
-      { where: { id: user.id, email: user.email } }
-    );
-    return res
-      .status(201)
-      .json({ success: true, message: "User's password updated successfully" });
+    const hashedPassword = await bcrypt.hash(password, salt)
+    await User.update({password: hashedPassword}, {where: {id: user.id, email: user.email}})
+    return res.status(201).json({code: 201, success: true, message: "User's password updated successfully"})
   } catch (error) {
-    console.log(error);
-    if (error.name === "TokenExpiredError") {
-      return res
-        .status(400)
-        .json({ success: false, message: "Reset token has expired" });
+    console.log(error)
+    if (error.name === 'TokenExpiredError') {
+      return res.status(400).json({code:400, success: false, message: 'Reset token has expired' });
     }
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({code:500,success: false, message: error.message})
   }
 };
