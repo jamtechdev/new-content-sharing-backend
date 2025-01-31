@@ -4,7 +4,6 @@ const db = require("../../models/index.js");
 const User = db.users;
 require("dotenv").config();
 const mailToSpecificUser = require("../../services/emailService.js");
-const {cloudinaryImageUpload} = require('../../services/cloudinaryService.js')
 
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$/;
 
@@ -22,15 +21,9 @@ exports.signUp = async (req, res) => {
       social,
       bio,
       region_id,
-      // avatar,
+      avatar,
       role_id,
     } = req.body;
-    const avatar = req.file
-
-    if (!req.file) {
-      return res.status(400).json({code: 400, success: false, message: 'No file uploaded' });
-    }
-    const avatarImageUri = await cloudinaryImageUpload(avatar.path)
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -78,7 +71,7 @@ exports.signUp = async (req, res) => {
       social,
       bio,
       region_id,
-      avatar: avatarImageUri,
+      avatar,
       role_id,
     });
     const token = jwt.sign({ userId: newUser.id }, process.env.JWT_SECRET, {
