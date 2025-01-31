@@ -1,4 +1,4 @@
-const { transporter } = require("../config/appConfig");
+const { transporter } = require("../config/mailConfig");
 require('dotenv').config()
 
 function mailToSpecificUser(to, subject, content) {
@@ -14,6 +14,7 @@ function mailToSpecificUser(to, subject, content) {
         console.log(error)
         reject(new Error("Failed to send email: " + error.message));  // Improved error handling
       } else {
+        console.log("Email sent: ", info.messageId)
         resolve("Email sent: " + info.response);  // Return success message
       }
     });

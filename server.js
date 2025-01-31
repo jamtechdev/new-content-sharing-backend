@@ -7,10 +7,15 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const userRouter = require("./routes/Api/users/users.route");
 const ProfileRouter = require("./routes/Api/users/usersProfile.route");
+const path = require('path')
+// require('./config/cloudinaryConfig')
 app.use(bodyParser.json());
-
 app.use(cors());
-app.use(express.static("public"));
+// app.use(express.static("public"));
+
+// const publicPath = 
+app.use(express.static(path.join(__dirname, '/public')));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

@@ -289,7 +289,7 @@ exports.forgotPassword = async (req, res) => {
       id: user.id,
       email: user.email
     }
-    const resetToken = jwt.sign(payload, process.env.RESET_PASSWORD_KEY, { expiresIn: '5m' })
+    const resetToken = jwt.sign(payload, process.env.RESET_PASSWORD_SECRET_KEY, { expiresIn: '5m' })
     const subject = `Password reset mail to: ${user.email}`;
     const content = `
         <html>
@@ -323,7 +323,7 @@ exports.forgotPassword = async (req, res) => {
             </div>
         </body>
         </html>`;
-    await mailToSpecificUser("shivammaurya234@gmail.com", subject, content);
+    await mailToSpecificUser(user.email, subject, content);
     return res.status(200).json({success: true, message: "Password reset link sent to you mail"})
   } catch (error) {
     return res.status(500).json({success: false, message: error.message });
@@ -333,9 +333,14 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res)=>{
   try {
     const {token, password, confirmPassword} = req.body
-    const decoded = jwt.verify(token, process.env.RESET_PASSWORD_KEY)
-    const user = await User.findOne({where: {id: decoded.id, email: decoded.email}});
-    if (!user || user.role_id !== 3) {
+    const decoded = jwt.verify(token, process.env.RESET_PASSWORD_SECRET_KEY)
+    const user = await User.findOne({where: {id: decoded.id, email: decoded.email}, include: [{
+      model: db.roles,
+      as: "role",
+      attributes: ["name", "guard_name"],
+    },] });
+
+    if (!user || user.role.name !== "user") {
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
@@ -357,6 +362,9 @@ exports.resetPassword = async (req, res)=>{
     return res.status(201).json({success: true, message: "User's password updated successfully"})
   } catch (error) {
     console.log(error)
+    if (error.name === 'TokenExpiredError') {
+      return res.status(400).json({ success: false, message: 'Reset token has expired' });
+    }
     return res.status(500).json({success: false, message: error.message})
   }
 }
