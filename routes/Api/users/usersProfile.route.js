@@ -17,9 +17,6 @@ router.get(
   authenticateToken,
   getModalProfileById
 );
-// update user API
-router.put("/update-user/:id", authenticateToken, updateUserById);
-// upload Image
-// router.post('/upload-image', upload.single('avatar'), cloudinaryImageUpload)
+router.put("/update-user", authenticateToken, updateUserById);
 
 module.exports = router;
