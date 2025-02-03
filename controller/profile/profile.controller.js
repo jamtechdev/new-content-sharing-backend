@@ -1,4 +1,5 @@
 require("dotenv").config();
+const { where } = require("sequelize");
 const db = require("../../models/index.js");
 const {
   cloudinaryImageUpload,
@@ -6,10 +7,21 @@ const {
 const User = db.users;
 const Region = db.Regions;
 const Profile = db.model_profile;
-const Content = db.contents
+const Content = db.Content
+
+const checkUser = async (userId)=>{
+  const user = await User.findOne({where: {id: userId}})
+  if(!user){
+    return {
+      code: 404,
+      success: false, 
+      message: "User not found"
+    }
+  }
+  return user
+}
 
 // create profile api
-
 exports.updateUserById = async (req, res) => {
   try {
     const user = req?.user;
@@ -279,13 +291,7 @@ exports.uploadAvatar = async (req, res) => {
         message: "No file uploaded",
       });
     }
-    const existing_user = await User.findOne({ where: { id: user?.userId }
-
-    
-    
-    
-    
-    });
+    const existing_user = await User.findOne({ where: { id: user?.userId }});
     if (!existing_user) {
       return res.status(404).json({
         code: 404,
@@ -293,7 +299,7 @@ exports.uploadAvatar = async (req, res) => {
         message: "User not found",
       });
     }
-    const uploadedAvatar = await cloudinaryImageUpload(avatar?.path);
+    const uploadedAvatar = await cloudinaryImageUpload(avatar?.path, "image");
     if (uploadedAvatar?.error) {
       return res.status(400).json({
         code: 400,
@@ -337,11 +343,11 @@ exports.uploadImage = async (req, res)=>{
       return res.status(404).json({code: 404, success: false, message: "No such model profile exists"})
     }
     
-    const imageUri = await cloudinaryImageUpload(image.path)
+    const imageUri = await cloudinaryImageUpload(image.path, "image")
     
     const response = req.body.profile_picture? await Profile.update({profile_picture: imageUri}, {where: {id: model_exists.id}})
     :await Profile.update({cover_photo: imageUri}, {where: {id: model_exists.id}})
-    console.log(response)
+
     const modelProfile = await Profile.findOne({where: {id: model_exists.id}})
     return res.status(200).json({
       code: 200,
@@ -357,20 +363,25 @@ exports.uploadImage = async (req, res)=>{
 
 exports.createContent = async (req, res) =>{
   const user = req?.user
-  // const video = req?.user
-  // const formData = req?.body
-  if(!user){
+  const {title,description,content_type,category_id} = req.body
+  const user_exists = await User.findOne({where: {id: user.userId}})
+
+  if(!user_exists){
     return res.status(404).json({code: 404, success: false, message: "No user found"})
   }
-  // if(Object.keys(req.body).length ===0){
-  //   return res.status(400).json({code: 400, success: false, message: "Content "})
-  // }
-  // if(!video){
-  //   return res.status(400).json({code: 400, success: false, message: "No video uploaded"})
-  // }
+  if(Object.keys(req.body).length ===0){
+    return res.status(400).json({code: 400, success: false, message: "Data is required to create content"})
+  }
   try {
-    // const videoUrl = await cloudinaryImageUpload(video.path)
-    const content = await Content.create(req?.body)
+    const data = {
+      title,
+      description,
+      content_type,
+      category_id,
+      user_id: user.userId,
+      region_id: user_exists.region_id,
+    }
+    const content = await Content.create(data)
     return res.status(201).json({code: 201, success: true, message: "Content created successfully", data: content})
     
   } catch (error) {
@@ -379,3 +390,82 @@ exports.createContent = async (req, res) =>{
   }
 }
 
+exports.uploadContent = async(req, res)=>{
+  try {
+    const user = req?.user
+    const {contentId} = req.params
+    const mediaFile = req?.file
+    const user_exists = await User.findOne({where: {id: user.userId}})
+    if(!user_exists){
+      return res.status(404).json({code: 404, success: false, message: "No user found"})
+    }
+    const content_exists = await Content.findOne({where: {id: contentId, user_id: user.userId}})
+    if(!content_exists){
+      return res.status(404).json({code: 404, success: false, message: "Content not found"})
+    }
+    if(!mediaFile){
+      return res.status(400).json({code: 400, success: false, message: "No media file attached"})
+    }
+    const mediaFileUrl = await cloudinaryImageUpload(mediaFile.path, content_exists.content_type)
+    await Content.update({media_url: mediaFileUrl}, {where: {user_id: user.userId, id: contentId}})
+    
+    const content = await Content.findOne({where: {user_id: user.userId, id: contentId}})
+    return res.status(200).json({code: 200, success: true, message: "Content uploaded successfully", data: content})
+  } catch (error) {
+    console.error("Error uploading content", error);
+    res.status(500).json({code: 500, success: false, error: "Internal server error" });
+  }
+}
+
+exports.getContent = async (req, res) =>{
+  try {
+    const user = req?.user
+    const {contentId} = req.params
+    console.log(contentId)
+  const user_exists = await checkUser(user.userId)
+  if(user_exists.code === 404){
+    return res.status(404).json({code: user_exists.code, success: false, message: user_exists.message})
+  }
+  const content = await Content.findOne({where: {id: contentId, user_id: user.userId}})
+  if(!content){
+    return res.status(404).json({code: 404, success: false, message: "Content not found"})
+  }
+  return res.status(200).json({code: 200, success: false, message: "Content fetched successfully", data: content})
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({code: 500, success: false, error: "Internal server error" });
+  }
+}
+
+exports.updateContent = async (req, res)=>{
+  try {
+    const user = req?.user
+    const {contentId} = req.params
+  if(Object.keys(req.body).length === 0){
+    return res.status(400).json({code: 400, success: false, message: "Data fields required to update content"})
+  }
+  const user_exists = await checkUser(user.userId)
+  if(user_exists.code === 404){
+    return res.status(404).json({code: user_exists.code, success: false, message: user_exists.message})
+  }
+
+  const content = await Content.findOne({where: {id: contentId, user_id: user.userId}})
+  if(!content){
+    return res.status(404).json({code: 404, success: false, message: "Content not found"})
+  }
+  const updateContent = await Content.update(req.body, {where: {id: contentId, user_id: user.userId}})
+  if (updateContent[0] === 0) {
+    return res.status(404).json({
+      code: 400,
+      error: true,
+      message: "Unable to update content",
+    });
+  }
+  const response = await Content.findOne({where: {id: contentId, user_id: user.userId}})
+
+  return res.status(200).json({code: 200, success: true, message: "Content data updated successfully", data: response})
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({code: 500, success: false, message: "Internal server error"})
+  }
+}

@@ -60,7 +60,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       media_url: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        // allowNull: false,
       },
       content_type: {
         type: DataTypes.ENUM("image", "video", "audio", "document"),
@@ -82,6 +82,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.ENUM("active", "inactive"),
         defaultValue: "active",
       },
+      
     },
     {
       sequelize,

@@ -10,16 +10,16 @@ const storage = multer.diskStorage({
     cb(null, file.originalname )
   },
 })
-const fileFilter = (req, file, cb)=>{
-  if(file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
-    cb(null, true)
-  }
-  else {
-    cb(null, false)
-    return cb("Supported file format: .jpg, .jpeg, .png", false)
-  }
-}
-const upload = multer({ storage, fileFilter });
+// const fileFilter = (req, file, cb)=>{
+//   if(file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+//     cb(null, true)
+//   }
+//   else {
+//     cb(null, false)
+//     return cb("Supported file format: .jpg, .jpeg, .png", false)
+//   }
+// }
+const upload = multer({ storage });
 
 
 
