@@ -7,7 +7,8 @@ const {
 const User = db.users;
 const Region = db.Regions;
 const Profile = db.model_profile;
-const Content = db.Content
+const Content = db.Content;
+const Category = db.ContentCategory
 
 const checkUser = async (userId)=>{
   const user = await User.findOne({where: {id: userId}})
@@ -419,18 +420,31 @@ exports.uploadContent = async(req, res)=>{
 
 exports.getContent = async (req, res) =>{
   try {
-    const user = req?.user
-    const {contentId} = req.params
-    console.log(contentId)
-  const user_exists = await checkUser(user.userId)
-  if(user_exists.code === 404){
-    return res.status(404).json({code: user_exists.code, success: false, message: user_exists.message})
-  }
-  const content = await Content.findOne({where: {id: contentId, user_id: user.userId}})
-  if(!content){
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const {userId} = req?.user
+    const user_exists = await checkUser(userId)
+    if(user_exists.code === 404){
+      return res.status(404).json({code: user_exists.code, success: false, message: user_exists.message})
+    }
+    const offset = (page-1)*limit
+  const {count, rows} = await Content.findAndCountAll({where: {region_id: user_exists.region_id},
+    limit,
+    offset
+  //   include: [{
+  //   model: Category,
+  //   as: "category"
+  // }]
+})
+  if(rows.length === 0){
     return res.status(404).json({code: 404, success: false, message: "Content not found"})
   }
-  return res.status(200).json({code: 200, success: false, message: "Content fetched successfully", data: content})
+  const pagination = {
+    totalPages: Math.ceil(count/limit),
+    totalDocs: count,
+    currentPage: page
+  }
+  return res.status(200).json({code: 200, success: true, total: count, region: user_exists.region_id, message: "Content fetched successfully", pagination:pagination, data: rows})
   } catch (error) {
     console.error(error);
     res.status(500).json({code: 500, success: false, error: "Internal server error" });
