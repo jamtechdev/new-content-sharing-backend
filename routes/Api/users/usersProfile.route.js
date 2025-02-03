@@ -4,6 +4,8 @@ const {
   createModalProfile,
   updateUserById,
   getMyProfile,
+  updateModelProfile,
+  uploadImage,
   uploadAvatar,
 } = require("../../../controller/profile/profile.controller");
 const { authenticateToken } = require("../../../middleware/middleware");
@@ -25,6 +27,9 @@ router.get(
 router.get("/get-my-profile", authenticateToken, getMyProfile);
 // update my profile
 router.put("/my-profile-update", authenticateToken, updateUserById);
+router.put('/update-model-profile', authenticateToken, updateModelProfile)
+router.put('/update-image', authenticateToken, upload.single('image'), uploadImage)
+
 // upload avatar
 router.post(
   "/upload-avatar",

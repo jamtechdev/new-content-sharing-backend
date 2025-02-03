@@ -6,6 +6,7 @@ const {
 const User = db.users;
 const Region = db.Regions;
 const Profile = db.model_profile;
+const Content = db.contents
 
 // create profile api
 
@@ -40,11 +41,12 @@ exports.updateUserById = async (req, res) => {
   }
 };
 exports.createModalProfile = async (req, res) => {
+  const user = req?.user
   try {
     const {
       username,
       bio,
-      user_id,
+      // user_id,
       region_id,
       website_url,
       social_links,
@@ -62,8 +64,14 @@ exports.createModalProfile = async (req, res) => {
       content_visibility,
     } = req.body;
 
+
+    const user_exists = await User.findOne({where: {id: user.userId}})
+    console.log(user_exists)
+    if(!user_exists){
+      return res.status(404).json({code: 404, success: false, message: "No such user exists"})
+    }
     const existing_profile = await Profile.findOne({
-      where: { user_id },
+      where: { user_id: user_exists.id },
     });
 
     const existing_username = await Profile.findOne({
@@ -86,7 +94,7 @@ exports.createModalProfile = async (req, res) => {
     const profile = await Profile.create({
       username,
       bio,
-      user_id,
+      user_id: user.userId,
       region_id,
       website_url,
       social_links,
@@ -114,6 +122,7 @@ exports.createModalProfile = async (req, res) => {
       code: 201,
       message: "User profile created successfully",
       status: true,
+      data: profile
     });
   } catch (error) {
     console.error(error);
@@ -126,7 +135,7 @@ exports.getModalProfileById = async (req, res) => {
     const { id } = req.params;
     const profile = await Profile.findOne({
       where: { id },
-      attributes: ["username", "bio"],
+      attributes: ["id", "username", "bio"],
       include: [
         {
           model: User,
@@ -159,6 +168,52 @@ exports.getModalProfileById = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+// update model profile
+exports.updateModelProfile = async (req, res)=>{
+  try {
+    const formdata = req?.body;
+    const user = req?.user;
+    
+      // if (user?.role != "model") {  // Need to ask here
+      //   return res.status(401).json({
+      //     error: true,
+      //     message: "Unauthorized Role! You are not allowed to this action.",
+      //   });
+      // }
+      if(Object.keys(formdata).length === 0){
+        return res.status(400).json({code: 400, success: false, message: "Fields required to update profile"})
+      }
+    const model_exists = await Profile.findOne({where: {user_id: user?.userId}})
+    if(!model_exists){
+      return res.status(404).json({code: 404, success: false, message: "No such model profile exists"})
+    }
+    const username_exists = formdata?.username && await Profile.findOne({where: {username: formdata.username}})
+    if(username_exists){
+      return res.status(409).json({code: 409, success: false, message: "Username already exists, please choose another"})
+    }
+    
+    const response = await Profile.update(formdata, {where: {id: model_exists.id}})
+    if (response[0] === 0) {
+      return res.status(404).json({
+        code: 404,
+        error: true,
+        message: "Id not found in table!",
+      });
+    }
+    const modelProfile = await Profile.findOne({where: {id: model_exists.id}})
+    return res.status(200).json({
+      code: 200,
+      status: true,
+      message: "Model profile updated successfully.",
+      data: modelProfile
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({code: 500, success: false, error: "Internal server error" });
+  }
+}
+
 // getUserProfile
 exports.getMyProfile = async (req, res) => {
   try {
@@ -206,7 +261,10 @@ exports.getMyProfile = async (req, res) => {
       status: true,
       data: UserData,
     });
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 // upload Aavart and Update
@@ -268,3 +326,58 @@ exports.uploadAvatar = async (req, res) => {
     });
   }
 };
+
+exports.uploadImage = async (req, res)=>{
+  try {
+    const user = req?.user
+    const image = req.file
+    if(!image){
+      return res.status(400).json({code: 400, success: false, message: "No image uploaded"})
+    }
+    const model_exists = await Profile.findOne({where: {user_id: user.userId}})
+    if(!model_exists){
+      return res.status(404).json({code: 404, success: false, message: "No such model profile exists"})
+    }
+    
+    const imageUri = await cloudinaryImageUpload(image.path)
+    
+    const response = req.body.profile_picture? await Profile.update({profile_picture: imageUri}, {where: {id: model_exists.id}})
+    :await Profile.update({cover_photo: imageUri}, {where: {id: model_exists.id}})
+    console.log(response)
+    const modelProfile = await Profile.findOne({where: {id: model_exists.id}})
+    return res.status(200).json({
+      code: 200,
+      status: true,
+      message: "Image uploaded successfully",
+      data: modelProfile
+    });
+  } catch (error) {
+    console.error("Error uploading avatar:", error);
+    res.status(500).json({code: 500, success: false, error: "Internal server error" });
+  }
+}
+
+exports.createContent = async (req, res) =>{
+  const user = req?.user
+  // const video = req?.user
+  // const formData = req?.body
+  if(!user){
+    return res.status(404).json({code: 404, success: false, message: "No user found"})
+  }
+  // if(Object.keys(req.body).length ===0){
+  //   return res.status(400).json({code: 400, success: false, message: "Content "})
+  // }
+  // if(!video){
+  //   return res.status(400).json({code: 400, success: false, message: "No video uploaded"})
+  // }
+  try {
+    // const videoUrl = await cloudinaryImageUpload(video.path)
+    const content = await Content.create(req?.body)
+    return res.status(201).json({code: 201, success: true, message: "Content created successfully", data: content})
+    
+  } catch (error) {
+    console.error("Error creating content", error);
+    res.status(500).json({code: 500, success: false, error: "Internal server error" });
+  }
+}
+
