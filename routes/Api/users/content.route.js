@@ -13,7 +13,7 @@ const {
 
 
 router.put('/upload-image', authenticateToken, upload.single('image'), uploadImage)
-router.post('/create-content', authenticateToken, upload.single('content'), createContent)
+router.post('/create-content', authenticateToken, upload.single('mediaFile'), createContent)
 router.put('/upload-content/:contentId', authenticateToken, upload.single('mediaFile'), uploadContent)
 router.get('/get-content', authenticateToken, getContent)
 router.put('/update-content', authenticateToken, updateContent)

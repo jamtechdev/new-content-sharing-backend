@@ -59,6 +59,7 @@ const {
 
 exports.createContent = async (req, res) => {
     const { userId } = req?.user;
+    const mediaFile = req?.file;
     const { title, description, content_type, category_id } = req.body;
     const user = await User.findOne({ where: { id: userId } });
   
@@ -69,7 +70,12 @@ exports.createContent = async (req, res) => {
         message: "Data is required to create content",
       });
     }
+
     try {
+      const mediaFileUrl = await cloudinaryImageUpload(
+        mediaFile.path,
+        content_type
+      );
       const data = {
         title,
         description,
@@ -77,6 +83,7 @@ exports.createContent = async (req, res) => {
         category_id,
         user_id: userId,
         region_id: user.region_id,
+        media_url: mediaFileUrl
       };
       const content = await Content.create(data);
       return res.status(201).json({

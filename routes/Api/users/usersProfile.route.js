@@ -3,9 +3,9 @@ const {
   getModalProfileById,
   createModalProfile,
   updateUserById,
-  getMyProfile,
+  // getMyProfile,
   updateModelProfile,
-  uploadAvatar,
+  // uploadAvatar,
 } = require("../../../controller/profile/profile.controller");
 const { authenticateToken, userProtect } = require("../../../middleware/middleware");
 const { upload } = require("../../../middleware/multerConfig");
@@ -21,19 +21,19 @@ router.get(
   getModalProfileById
 );
 // get my profile
-router.get("/get-my-profile", authenticateToken, getMyProfile);
+// router.get("/get-my-profile", authenticateToken, getMyProfile);
 // update my profile
 router.put("/my-profile-update", authenticateToken, updateUserById);
 router.put('/update-model-profile', authenticateToken, updateModelProfile)
 
 
 // upload avatar
-router.post(
-  "/upload-avatar",
-  authenticateToken,
-  userProtect,
-  upload.single("avatar"),
-  uploadAvatar
-);
+// router.post(
+//   "/upload-avatar",
+//   authenticateToken,
+//   userProtect,
+//   upload.single("avatar"),
+//   uploadAvatar
+// );
 
 module.exports = router;
