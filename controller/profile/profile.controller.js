@@ -276,5 +276,53 @@ exports.updateModelProfile = async (req, res) => {
   }
 };
 
-
+//   --------------> to upload profile picture and cover photo <------------------------
+  exports.uploadImage = async (req, res) => {
+    try {
+      const user = req?.user;
+      const image = req.file;
+      if (!image) {
+        return res
+          .status(400)
+          .json({ code: 400, success: false, message: "No image uploaded" });
+      }
+      const model_exists = await Profile.findOne({
+        where: { user_id: user.userId },
+      });
+      if (!model_exists) {
+        return res.status(404).json({
+          code: 404,
+          success: false,
+          message: "No such model profile exists",
+        });
+      }
+  
+      const imageUri = await cloudinaryImageUpload(image.path);
+  
+      const response = req.body.profile_picture
+        ? await Profile.update(
+            { profile_picture: imageUri.secure_url },
+            { where: { id: model_exists.id } }
+          )
+        : await Profile.update(
+            { cover_photo: imageUri.secure_url },
+            { where: { id: model_exists.id } }
+          );
+  
+      const modelProfile = await Profile.findOne({
+        where: { id: model_exists.id },
+      });
+      return res.status(200).json({
+        code: 200,
+        status: true,
+        message: "Image uploaded successfully",
+        data: modelProfile,
+      });
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      res
+        .status(500)
+        .json({ code: 500, success: false, error: "Internal server error" });
+    }
+  };
 

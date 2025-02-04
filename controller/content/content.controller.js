@@ -1,61 +1,14 @@
 const db = require("../../models/index.js");
 const Content = db.Content;
 const User = db.users;
+const Profile = db.model_profile;
+
 const {
     cloudinaryImageUpload,
   } = require("../../services/cloudinaryService.js");
 
 
 
-//   --------------> to upload profile picture and cover photo <------------------------
-  exports.uploadImage = async (req, res) => {
-    try {
-      const user = req?.user;
-      const image = req.file;
-      if (!image) {
-        return res
-          .status(400)
-          .json({ code: 400, success: false, message: "No image uploaded" });
-      }
-      const model_exists = await Profile.findOne({
-        where: { user_id: user.userId },
-      });
-      if (!model_exists) {
-        return res.status(404).json({
-          code: 404,
-          success: false,
-          message: "No such model profile exists",
-        });
-      }
-  
-      const imageUri = await cloudinaryImageUpload(image.path, "image");
-  
-      const response = req.body.profile_picture
-        ? await Profile.update(
-            { profile_picture: imageUri },
-            { where: { id: model_exists.id } }
-          )
-        : await Profile.update(
-            { cover_photo: imageUri },
-            { where: { id: model_exists.id } }
-          );
-  
-      const modelProfile = await Profile.findOne({
-        where: { id: model_exists.id },
-      });
-      return res.status(200).json({
-        code: 200,
-        status: true,
-        message: "Image uploaded successfully",
-        data: modelProfile,
-      });
-    } catch (error) {
-      console.error("Error uploading avatar:", error);
-      res
-        .status(500)
-        .json({ code: 500, success: false, error: "Internal server error" });
-    }
-  };
 
 exports.createContent = async (req, res) => {
     const { userId } = req?.user;
@@ -73,17 +26,16 @@ exports.createContent = async (req, res) => {
 
     try {
       const mediaFileUrl = await cloudinaryImageUpload(
-        mediaFile.path,
-        content_type
+        mediaFile.path
       );
       const data = {
         title,
         description,
-        content_type,
+        content_type: mediaFileUrl.resource_type,
         category_id,
         user_id: userId,
         region_id: user.region_id,
-        media_url: mediaFileUrl
+        media_url: mediaFileUrl.secure_url
       };
       const content = await Content.create(data);
       return res.status(201).json({
@@ -119,11 +71,10 @@ exports.createContent = async (req, res) => {
           .json({ code: 400, success: false, message: "No media file attached" });
       }
       const mediaFileUrl = await cloudinaryImageUpload(
-        mediaFile.path,
-        content_exists.content_type
+        mediaFile.path
       );
       await Content.update(
-        { media_url: mediaFileUrl },
+        { media_url: mediaFileUrl.secure_url },
         { where: { user_id: user.userId, id: contentId } }
       );
   

@@ -5,6 +5,7 @@ const {
   updateUserById,
   // getMyProfile,
   updateModelProfile,
+  uploadImage,
   // uploadAvatar,
 } = require("../../../controller/profile/profile.controller");
 const { authenticateToken, userProtect } = require("../../../middleware/middleware");
@@ -25,6 +26,7 @@ router.get(
 // update my profile
 router.put("/my-profile-update", authenticateToken, updateUserById);
 router.put('/update-model-profile', authenticateToken, updateModelProfile)
+router.put('/upload-image', authenticateToken, upload.single('image'), uploadImage)
 
 
 // upload avatar
