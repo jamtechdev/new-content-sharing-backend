@@ -93,10 +93,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
-      is_model: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
-      },
+    
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,
