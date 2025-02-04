@@ -10,18 +10,6 @@ const Profile = db.model_profile;
 const Content = db.Content;
 const Category = db.ContentCategory
 
-const checkUser = async (userId)=>{
-  const user = await User.findOne({where: {id: userId}})
-  if(!user){
-    return {
-      code: 404,
-      success: false, 
-      message: "User not found"
-    }
-  }
-  return user
-}
-
 // create profile api
 exports.updateUserById = async (req, res) => {
   try {
@@ -77,14 +65,8 @@ exports.createModalProfile = async (req, res) => {
       content_visibility,
     } = req.body;
 
-
-    const user_exists = await User.findOne({where: {id: user.userId}})
-    console.log(user_exists)
-    if(!user_exists){
-      return res.status(404).json({code: 404, success: false, message: "No such user exists"})
-    }
     const existing_profile = await Profile.findOne({
-      where: { user_id: user_exists.id },
+      where: { user_id: user.userId },
     });
 
     const existing_username = await Profile.findOne({
@@ -363,13 +345,10 @@ exports.uploadImage = async (req, res)=>{
 }
 
 exports.createContent = async (req, res) =>{
-  const user = req?.user
+  const {userId} = req?.user
   const {title,description,content_type,category_id} = req.body
-  const user_exists = await User.findOne({where: {id: user.userId}})
+  const user = await User.findOne({where: {id: user.userId}})
 
-  if(!user_exists){
-    return res.status(404).json({code: 404, success: false, message: "No user found"})
-  }
   if(Object.keys(req.body).length ===0){
     return res.status(400).json({code: 400, success: false, message: "Data is required to create content"})
   }
@@ -379,8 +358,8 @@ exports.createContent = async (req, res) =>{
       description,
       content_type,
       category_id,
-      user_id: user.userId,
-      region_id: user_exists.region_id,
+      user_id: userId,
+      region_id: user.region_id,
     }
     const content = await Content.create(data)
     return res.status(201).json({code: 201, success: true, message: "Content created successfully", data: content})
@@ -396,10 +375,6 @@ exports.uploadContent = async(req, res)=>{
     const user = req?.user
     const {contentId} = req.params
     const mediaFile = req?.file
-    const user_exists = await User.findOne({where: {id: user.userId}})
-    if(!user_exists){
-      return res.status(404).json({code: 404, success: false, message: "No user found"})
-    }
     const content_exists = await Content.findOne({where: {id: contentId, user_id: user.userId}})
     if(!content_exists){
       return res.status(404).json({code: 404, success: false, message: "Content not found"})
@@ -423,12 +398,10 @@ exports.getContent = async (req, res) =>{
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const {userId} = req?.user
-    const user_exists = await checkUser(userId)
-    if(user_exists.code === 404){
-      return res.status(404).json({code: user_exists.code, success: false, message: user_exists.message})
-    }
-    const offset = (page-1)*limit
-  const {count, rows} = await Content.findAndCountAll({where: {region_id: user_exists.region_id},
+    const user = await User.findOne({where: {id: userId}})
+
+  const offset = (page-1)*limit
+  const {count, rows} = await Content.findAndCountAll({where: {region_id: user.region_id},
     limit,
     offset
   //   include: [{
@@ -444,7 +417,7 @@ exports.getContent = async (req, res) =>{
     totalDocs: count,
     currentPage: page
   }
-  return res.status(200).json({code: 200, success: true, total: count, region: user_exists.region_id, message: "Content fetched successfully", pagination:pagination, data: rows})
+  return res.status(200).json({code: 200, success: true, total: count, region: user.region_id, message: "Content fetched successfully", pagination:pagination, data: rows})
   } catch (error) {
     console.error(error);
     res.status(500).json({code: 500, success: false, error: "Internal server error" });
@@ -458,11 +431,6 @@ exports.updateContent = async (req, res)=>{
   if(Object.keys(req.body).length === 0){
     return res.status(400).json({code: 400, success: false, message: "Data fields required to update content"})
   }
-  const user_exists = await checkUser(user.userId)
-  if(user_exists.code === 404){
-    return res.status(404).json({code: user_exists.code, success: false, message: user_exists.message})
-  }
-
   const content = await Content.findOne({where: {id: contentId, user_id: user.userId}})
   if(!content){
     return res.status(404).json({code: 404, success: false, message: "Content not found"})

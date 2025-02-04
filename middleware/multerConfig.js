@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
 //     return cb("Supported file format: .jpg, .jpeg, .png", false)
 //   }
 // }
-const upload = multer({ storage });
+const upload = multer({ storage, limits: {fileSize: 4*100*100*100} }); // 4mb size
 
 
 
