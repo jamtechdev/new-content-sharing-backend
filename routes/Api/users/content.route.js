@@ -4,7 +4,6 @@ const router = express.Router()
 const {authenticateToken } = require('../../../middleware/middleware')
 const {upload} = require('../../../middleware/multerConfig')
 const {  
-    uploadImage,
     createContent,
     uploadContent,
     getContent,
@@ -12,7 +11,7 @@ const {
 } = require('../../../controller/content/content.controller')
 
 
-router.put('/upload-image', authenticateToken, upload.single('image'), uploadImage)
+
 router.post('/create-content', authenticateToken, upload.single('mediaFile'), createContent)
 router.put('/upload-content/:contentId', authenticateToken, upload.single('mediaFile'), uploadContent)
 router.get('/get-content', authenticateToken, getContent)

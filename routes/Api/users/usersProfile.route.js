@@ -7,10 +7,6 @@ const {
   updateModelProfile,
   uploadImage,
   uploadAvatar,
-  createContent,
-  uploadContent,
-  getContent,
-  updateContent,
 } = require("../../../controller/profile/profile.controller");
 const { authenticateToken, userProtect } = require("../../../middleware/middleware");
 const { upload } = require("../../../middleware/multerConfig");
@@ -32,25 +28,7 @@ router.get("/get-my-profile", authenticateToken, getMyProfile);
 // update my profile
 router.put("/my-profile-update", authenticateToken, updateUserById);
 router.put('/update-model-profile', authenticateToken, updateModelProfile)
-router.put('/upload-image', authenticateToken, upload.single('image'), uploadImage);
-
-
-                                      
-
-router.post('/create-content', authenticateToken, upload.single('content'), createContent);
-// router.put('/upload-content/:contentId', authenticateToken, upload.single('mediaFile'), uploadContent);
-router.get('/get-content/:contentId', authenticateToken, getContent);
-
-
-router.put('/update-content/:contentId', authenticateToken, updateContent);
-
-
-
-
-
-
-
-
+router.put('/upload-image', authenticateToken, upload.single('image'), uploadImage)
 
 // upload avatar
 router.post(
