@@ -83,6 +83,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
+      content_visibility: {
+        type: DataTypes.ENUM("all", "subscribers_only", "premium_only"),
+        defaultValue: "all",
+      },
       status: {
         type: DataTypes.ENUM("active", "inactive"),
         defaultValue: "active",

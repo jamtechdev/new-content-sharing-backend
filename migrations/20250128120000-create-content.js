@@ -45,6 +45,10 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: true,
       },
+      content_visibility: {
+        type: Sequelize.ENUM("all", "subscribers_only", "premium_only"),
+        defaultValue: "all",
+      },
       status: {
         type: Sequelize.ENUM("active", "inactive"),
         defaultValue: "active",
